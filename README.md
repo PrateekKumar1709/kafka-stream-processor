@@ -1,5 +1,3 @@
-# kafka-stream-processor
-Real-time data processing pipeline using Apache Kafka and Docker
 # Kafka Stream Processor
 A real-time stream processing application that analyzes user login events using Apache Kafka, with metrics monitoring through Prometheus and Grafana.
 
