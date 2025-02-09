@@ -33,12 +33,12 @@ This project implements a streaming data pipeline that:
 
 ## Installation & Setup
 1. Clone the repository:
-    git clone <https://github.com/PrateekKumar1709/kafka-stream-processor.git>
-    cd kafka-stream-processor
+    - git clone <https://github.com/PrateekKumar1709/kafka-stream-processor.git>
+    - cd kafka-stream-processor
 2. Initialize the project:
-    make init
+    - make init
 3. Start all services:
-    make start
+    - make start
 
 ### Available Make Commands
 1. make init: Initialize project and install dependencies
@@ -68,10 +68,9 @@ This project implements a streaming data pipeline that:
 ## Testing
 ### Running Tests
 1. Run all tests with coverage
-    make test
-
+    - make test
 2. Run linting
-    make lint
+    - make lint
 
 ### Test Structure
 1. Unit tests for individual components
@@ -80,64 +79,64 @@ This project implements a streaming data pipeline that:
 
 ### Troubleshooting Common Issues
 1. Connection refused errors: Ensure all services are   running (docker-compose ps)
-Check logs (make logs)
+    - Check logs (make logs)
 2. Missing metrics:
-Verify Prometheus target status
-Check consumer metrics endpoint
+    - Verify Prometheus target status
+    - Check consumer metrics endpoint
 3. Topic creation issues:
-Use Kafdrop UI to verify topic existence
-Check Kafka broker logs
+    - Use Kafdrop UI to verify topic existence
+    - Check Kafka broker logs
 
 ## Next Steps:
 ### Production Deployment Strategy:
 1. Use Kubernetes for container orchestration instead of Docker Compose
 2. Implement CI/CD pipeline using GitHub Actions/Jenkins with:
-    Automated testing
-    Security scanning
-    Image versioning
-    Deployment stages (dev, staging, prod)
+    - Automated testing
+    - Security scanning
+    - Image versioning
+    - Deployment stages (dev, staging, prod)
 3. Use proper secret management (HashiCorp Vault/AWS Secrets Manager)
 4. Configure proper networking and security groups
 5. Implement proper logging aggregation (ELK Stack/Splunk)
 
 ### Additional Production Components:
 1. Security:
-SSL/TLS encryption for Kafka
-2. Authentication/Authorization (SASL)
-API Gateway for external access
-3. Network segmentation
-4. Monitoring & Alerting:
-Alert manager for Prometheus
-PagerDuty integration
-SLO/SLA monitoring
-Enhanced logging with correlation IDs
-5. Data Management:
-Schema Registry for message validation
-Dead Letter Queue for failed messages
-Data backup and recovery solution
-Data retention policies
-6. High Availability:
-Multi-AZ deployment
-Load balancers
-Service mesh (Istio)
-Circuit breakers
+    - SSL/TLS encryption for Kafka
+    - Authentication/Authorization (SASL)
+    - API Gateway for external access
+    - Network segmentation
+2. Monitoring & Alerting:
+    - Alert manager for Prometheus
+    - PagerDuty integration
+    - SLO/SLA monitoring
+    - Enhanced logging with correlation IDs
+3. Data Management:
+    - Schema Registry for message validation
+    - Dead Letter Queue for failed messages
+    - Data backup and recovery solution
+    - Data retention policies
+4. High Availability:
+    - Multi-AZ deployment
+    - Load balancers
+    - Service mesh (Istio)
+    - Circuit breakers
 ### Scaling Strategies:
 1. Kafka Scaling:
-Increase partition count for topics
-Add more Kafka brokers
-Implement consumer groups for parallel processing
+    - Increase partition count for topics
+    - Add more Kafka brokers
+    - Implement consumer groups for parallel processing
 2. Consumer Scaling:
-Horizontal scaling of consumer instances
-Implement back-pressure handling
-Add caching layer (Redis)
-Optimize batch processing
+    - Horizontal scaling of consumer instances
+    - Implement back-pressure handling
+    - Add caching layer (Redis)
+    - Optimize batch processing
 3. Infrastructure Scaling:
-Auto-scaling groups
-Resource quotas and limits
-Performance monitoring and tuning
-Database sharding if needed
+    - Auto-scaling groups
+    - Resource quotas and limits
+    - Performance monitoring and tuning
+    - Database sharding if needed
 4. Monitoring Scaling:
-Distributed tracing (Jaeger/Zipkin)
-Metrics aggregation
-Log rotation and archival
-Capacity planning
+    - Distributed tracing (Jaeger/Zipkin)
+    - Metrics aggregation
+    - Log rotation and archival
+    - Capacity planning
