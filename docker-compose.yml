@@ -1,0 +1,135 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    healthcheck:
+      test: ["CMD-SHELL", "echo srvr | nc localhost 2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
+    networks:
+      - kafka-network
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    healthcheck:
+      test: ["CMD-SHELL", "/usr/bin/kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+      - 29092:29092
+    networks:
+      - kafka-network
+    environment:
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_CREATE_TOPICS: "user-login:1:1,processed-logins:1:1"
+      KAFKA_BROKER_ID: 0
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka:9092,LISTENER_EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+  my-python-producer:
+    image: mpradeep954/fetch-de-data-gen
+    platform: linux/amd64  
+    depends_on:
+      - kafka
+    restart: on-failure:10
+    ports:
+      - 9093:9093
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC: user-login
+    networks:
+      - kafka-network
+
+  kafka-consumer:
+    container_name: kafka-consumer
+    hostname: kafka-consumer
+    platform: linux/amd64  
+    build: 
+      context: .
+      dockerfile: docker/consumer/Dockerfile
+    depends_on:
+      kafka:
+        condition: service_healthy
+    expose:
+      - 8000
+    ports:
+      - "8000:8000"
+    restart: always
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      INPUT_TOPIC: user-login
+      OUTPUT_TOPIC: processed-logins
+      METRICS_PORT: 8000
+    networks:
+      kafka-network:
+        aliases:
+          - kafka-consumer 
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop:latest
+    container_name: kafdrop
+    depends_on:
+      - kafka
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: kafka:9092
+      JVM_OPTS: "-Xms32M -Xmx64M"
+      SERVER_SERVLET_CONTEXTPATH: "/"
+    networks:
+      - kafka-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./configs/prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - kafka-network
+    depends_on:
+      - kafka-consumer
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/kafka-dashboard.json
+    volumes:
+      - ./configs/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./configs/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    networks:
+      - kafka-network
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  kafka-network:
+    name: kafka-network
+    driver: bridge

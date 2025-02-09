@@ -1,0 +1,9 @@
+pytest
+pytest-cov
+pytest-mock
+mypy
+black
+isort
+pre-commit
+flake8==6.1.0
+pylint==3.0.1
